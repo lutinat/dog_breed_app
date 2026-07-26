@@ -247,6 +247,27 @@ components:
     border: "1px solid {colors.hairline}"
 ---
 
+## Status
+
+Early design exploration (`version: alpha`) — not scheduled for implementation yet.
+Per [`CLAUDE.md`](CLAUDE.md), the current priority is engineering: backend, ML
+integration, and the core MVP flow described in [`docs/plan.md`](docs/plan.md). Design
+work picks up after that foundation exists.
+
+Some elements below go beyond the current MVP scope and will need re-scoping (or an
+explicit roadmap decision) before they're built:
+- The Field/camera interaction assumes **automatic dog detection** ("auto-fire", the
+  bounding box that snaps onto a live-detected dog). The MVP has no detection model —
+  the user crops manually. Auto-detection is a *Next version* item in
+  [`docs/roadmap.md`](docs/roadmap.md).
+- The **rarity system** (common/rare/legendary) and **points/streaks/weekly challenges**
+  aren't in `plan.md` or `roadmap.md` at any stage — they fall under the "advanced
+  gamification" the roadmap explicitly defers to Future/unplanned.
+- The **Map screen** (bottom nav + discovery map) isn't part of the MVP screen list and
+  implies geolocation data not yet designed.
+- **Virtual-dog-care mechanics** (Known Gaps) don't correspond to anything currently in
+  the roadmap.
+
 ## Rationale
 
 This system is built around one structural idea: the product has two rooms, and each should feel like a different place. The **Field** is where discovery happens — the camera is open, a real dog is in front of the user, and the interface needs to get out of the way: near-black pine background, minimal chrome, one glowing action. The **Album** is where pride happens — the collection, breed details, progress, and rewards live on a warm paper canvas that invites lingering, browsing, and showing off. Every other decision in this document — color, type, motion, shadow — exists to serve that split, because the emotional arc of the app (curiosity in the field, pride in the album) is the actual product, not a theme.

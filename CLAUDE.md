@@ -35,6 +35,8 @@ User → mobile app → manual crop → backend API → ML model → classificat
 - `/ml` — existing ML model integration (loading, preprocessing, inference)
 - `/docs` — architecture decisions, specs, API contract, [`plan.md`](docs/plan.md) (MVP
   detail), [`roadmap.md`](docs/roadmap.md) (post-MVP versions)
+- [`DESIGN.md`](DESIGN.md) — early design-system exploration, not scheduled yet (see
+  "Current priorities" below); some of it goes beyond MVP scope
 
 ## Environment
 
@@ -54,6 +56,10 @@ User → mobile app → manual crop → backend API → ML model → classificat
 - Keep the architecture simple until the MVP is validated — avoid over-engineering
 - Features beyond the MVP (auto-detection, mini-games, flash cards, social, etc.) belong
   in [`docs/roadmap.md`](docs/roadmap.md), not here, until they're in active development
+- Engineering comes first, design comes after: build the MVP flow with plain UI, don't
+  implement [`DESIGN.md`](DESIGN.md) yet. When design work does start, reconcile it with
+  `docs/plan.md`/`docs/roadmap.md` first — it currently assumes some post-MVP or
+  unplanned features (auto-detection, rarity/points system, map screen)
 
 ## To define in upcoming sessions
 
