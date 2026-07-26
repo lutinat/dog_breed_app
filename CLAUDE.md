@@ -1,57 +1,68 @@
 # CLAUDE.md
 
-## Projet
+## Project
 
-Dog Breed App — application mobile permettant d'identifier la race d'un chien à partir
-d'une photo, et d'afficher des informations associées (description, tempérament, besoins).
+Dog Breed App — mobile app that identifies a dog's breed from a photo, turns it into a
+Pokédex-style collection game, and teaches the user a bit about each breed discovered.
 
-Double objectif du projet :
-- construire une application complète et de qualité autour d'un modèle IA déjà entraîné ;
-- servir de support d'apprentissage au développement full-stack assisté par Claude Code.
+Dual purpose of this project:
+- build a complete, good-quality app around an already-trained ML model;
+- serve as a learning vehicle for full-stack development assisted by Claude Code.
 
-Ne pas perdre de vue le second objectif : privilégier des explications claires des choix
-techniques plutôt que du code généré sans contexte.
+Keep the second goal in mind: favor clear explanations of technical choices over code
+generated without context.
 
-## Stack technique
+## Tech stack
 
-- Frontend mobile : React Native + Expo
-- Backend API : FastAPI (Python)
-- Base de données : PostgreSQL
-- Modèle IA : déjà entraîné et fourni — ce projet ne vise pas l'entraînement d'un modèle,
-  seulement son intégration.
+- Mobile frontend: React Native + Expo, TypeScript
+- Backend API: FastAPI (Python) — not scaffolded yet
+- Database: PostgreSQL
+- ML model: already trained and provided — this project does not train or modify the
+  model, only integrates it. It currently does breed **classification only**: no dog
+  detection, no automatic bounding boxes, no segmentation, no multi-dog handling. Do not
+  assume these capabilities exist.
 
-## Flux principal
+## Main flow
 
 ```
-Utilisateur → app mobile → API backend → modèle IA → résultat de classification → affichage
+User → mobile app → manual crop → backend API → ML model → classification result → display
 ```
 
-## Structure du repo (à créer/confirmer au démarrage)
+## Repo structure
 
-- `/mobile` — app React Native / Expo
-- `/backend` — API FastAPI
-- `/ml` — intégration du modèle IA existant (chargement, prétraitement, inférence)
-- `/docs` — décisions d'architecture, spécifications, contrat d'API
+- `/mobile` — React Native / Expo app
+- `/backend` — FastAPI API (to create)
+- `/ml` — existing ML model integration (loading, preprocessing, inference)
+- `/docs` — architecture decisions, specs, API contract, [`plan.md`](docs/plan.md) (MVP
+  detail), [`roadmap.md`](docs/roadmap.md) (post-MVP versions)
 
-## Environnement
+## Environment
 
-- Linux, gestion d'environnement Python via Miniconda/Conda
-- Dépôt git : `dog_breed`, branche principale `master`
+- Linux, Python environment managed via Miniconda/Conda
+- Git repo: `dog_breed_app`, main branch `main`
+- The ML training code lives in a separate repo (`dog_breed/model`) — not part of this
+  repo. This project only consumes the trained weights (`ml/resnet50_first_run.pth`).
 
-## Priorités actuelles
+## Current priorities
 
-- Ne pas entraîner ni modifier le modèle IA existant, seulement l'intégrer
-- Flux MVP minimal : upload/prise de photo → prédiction → affichage race + niveau de confiance
-- Garder l'architecture simple tant que le MVP n'est pas validé — éviter la sur-ingénierie
+- Do not train or modify the existing ML model, only integrate it
+- MVP scope: auth, scan with manual crop, breed prediction (top-3 shown when confidence
+  is low), Pokédex-style collection, 1-2 fun facts per breed on first discovery — full
+  detail in [`docs/plan.md`](docs/plan.md)
+- No automatic dog detection in the MVP — the user manually crops the dog area before
+  the image is sent to the model
+- Keep the architecture simple until the MVP is validated — avoid over-engineering
+- Features beyond the MVP (auto-detection, mini-games, flash cards, social, etc.) belong
+  in [`docs/roadmap.md`](docs/roadmap.md), not here, until they're in active development
 
-## À définir au fil des prochaines sessions
+## To define in upcoming sessions
 
-- Mode de service du modèle IA (chargé dans le process FastAPI vs service séparé)
-- Contrat d'API entre mobile et backend (format d'upload, réponse JSON, gestion des erreurs)
-- Schéma de base de données PostgreSQL
-- Conventions de style et de commit (backend, frontend)
-- Commandes de build / lint / test une fois le projet initialisé
+- ML model serving mode (loaded in the FastAPI process vs. a separate service)
+- API contract between mobile and backend (upload format, JSON response, error handling)
+- PostgreSQL schema (users, breeds, collection, possibly scan history)
+- Style and commit conventions (backend, frontend)
+- Build / lint / test commands once the project is initialized
 
 ---
-*Fichier à tenir à jour au fil du projet — garder les entrées courtes, renvoyer vers `/docs`
-pour le détail plutôt que de tout coller ici.*
+*Keep this file up to date as the project evolves — keep entries short, point to `/docs`
+for detail instead of pasting everything here.*

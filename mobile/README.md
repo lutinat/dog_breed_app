@@ -1,7 +1,7 @@
 # Dog Breed Classifier - Mobile App
 
-Ce README concerne uniquement le dossier `mobile/` (l'application React Native + Expo).
-Pour le contexte global du projet, voir `CLAUDE.md` et `docs/plan.md` à la racine.
+This README covers only the `mobile/` folder (the React Native + Expo app).
+For overall project context, see `CLAUDE.md` and `docs/plan.md` at the repo root.
 
 ## Overview
 

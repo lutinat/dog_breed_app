@@ -1,16 +1,18 @@
 # Dog Breed Classification
 
-Mobile app for identifying dog breeds from a photo, built around an existing
-machine learning model.
+Mobile app that identifies a dog's breed from a photo, turns discoveries into a
+Pokédex-style collection, and teaches the user about each breed found. Built around
+an existing, already-trained ML model — see [docs/plan.md](docs/plan.md) for the full
+MVP scope.
 
 ## Structure
 
 ```
-dog_breed_classification/
+dog_breed_app/
 ├── mobile/     # React Native (Expo) mobile app
-├── backend/    # FastAPI API — serves the ML model, handles data
+├── backend/    # FastAPI API — serves the ML model, handles data (not scaffolded yet)
 ├── ml/         # Existing ML model integration (no training in this repo)
-└── docs/       # Architecture decisions, specs, roadmap
+└── docs/       # Architecture decisions, specs, plan.md (MVP detail), roadmap.md
 ```
 
 ## Quick Start
@@ -27,13 +29,13 @@ See [mobile/README.md](mobile/README.md) for details.
 
 ### Backend
 
+Not scaffolded yet. Once created:
+
 ```bash
 cd backend
-conda activate dog_breed   # or your environment name
+conda activate dog_breed_app   # or your environment name
 uvicorn main:app --reload
 ```
-
-See [backend/README.md](backend/README.md) for details.
 
 ## Prerequisites
 
