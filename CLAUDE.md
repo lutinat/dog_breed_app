@@ -31,7 +31,7 @@ User → mobile app → manual crop → backend API → ML model → classificat
 ## Repo structure
 
 - `/mobile` — React Native / Expo app
-- `/backend` — FastAPI API (to create)
+- `/backend` — FastAPI API (`/predict` endpoint wraps the model in `/ml`; no auth/DB yet)
 - `/ml` — existing ML model integration (loading, preprocessing, inference)
 - `/docs` — architecture decisions, specs, API contract, [`plan.md`](docs/plan.md) (MVP
   detail), [`roadmap.md`](docs/roadmap.md) (post-MVP versions)

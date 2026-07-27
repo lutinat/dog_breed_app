@@ -5,87 +5,80 @@ For overall project context, see `CLAUDE.md` and `docs/plan.md` at the repo root
 
 ## Overview
 
-The mobile application is built with React Native + Expo using TypeScript.
-Expo provides a cross-platform development environment with a single codebase for the mobile application.
+Built with React Native + Expo (TypeScript), using Expo Router for file-based
+navigation. Currently a single screen: take or pick a photo of a dog and get a
+breed prediction from the backend.
 
 ## Project Structure
 
 ```
 mobile/
-├── app/
-│   ├── _layout.tsx      # Navigation and app structure
-│   └── index.tsx        # Main screen
-├── assets/              # Images, icons, fonts
-├── package.json         # Dependencies and scripts
-├── app.json             # Expo configuration
+├── src/
+│   └── app/
+│       ├── _layout.tsx   # Root navigation stack
+│       └── index.tsx     # Scan screen: camera/gallery picker + prediction results
+├── assets/                # Icons, splash screen
+├── package.json
+├── app.json               # Expo config (name, icons, permissions)
 └── README.md
 ```
 
-The `app/` directory contains the application screens. Each file inside this folder represents a route/screen managed by Expo Router.
-
-Example:
-
-```
-app/
-├── index.tsx        # Home screen
-├── collection.tsx   # Dog breed collection
-└── profile.tsx       # User profile
-```
+Only screens/layout files go in `src/app/` (Expo Router convention); everything else
+(components, hooks, utils) should go elsewhere under `src/` as the app grows.
 
 ## Getting Started
-
-Install dependencies:
 
 ```bash
 cd mobile
 npm install
 ```
 
-Start the application:
+### Point the app at the backend
+
+The backend needs to be reachable from your phone over the LAN — `localhost` won't
+work from a physical device in Expo Go. Find your dev machine's LAN IP
+(`hostname -I` on Linux) and create `mobile/.env`:
+
+```
+EXPO_PUBLIC_API_URL=http://<your-lan-ip>:8000
+```
+
+See [`../backend/README.md`](../backend/README.md) for how to start the backend with
+`--host 0.0.0.0` so it's reachable on the LAN.
+
+**If your dev machine is WSL2**: WSL2's default NAT networking gives it an IP
+(`hostname -I`, e.g. `172.x.x.x`) that's only reachable from Windows, not from other
+devices on your LAN like your phone — using it in `EXPO_PUBLIC_API_URL` will fail
+with "Failed to fetch" from a physical device even though the backend works fine on
+`localhost` from the same PC. Fix: enable WSL2 **mirrored networking** — add to
+`C:\Users\<you>\.wslconfig`:
+```ini
+[wsl2]
+networkingMode=mirrored
+```
+then run `wsl --shutdown` from PowerShell (not from inside WSL) and reopen your WSL
+terminal. After that, `hostname -I` inside WSL returns an IP reachable from your LAN
+— use that in `.env`. Requires Windows 11 22H2+ / WSL 2.0+. If your phone still can't
+connect after this, check Windows Firewall isn't blocking inbound port 8000.
+
+### Run
 
 ```bash
 npx expo start
 ```
 
-The app can then be launched with:
+Open with Expo Go on a physical device (scan the QR code), an iOS simulator, an
+Android emulator, or a web browser.
 
-- Expo Go on a physical device
-- Web browser
-- iOS simulator
-- Android emulator
+## Current screen
 
-## Development
-
-The application is written in TypeScript and uses React components to build the user interface.
-
-Main files:
-
-- `app/index.tsx` → Main screen
-- `app/_layout.tsx` → Navigation configuration
-
-### Fast Refresh
-
-Expo Fast Refresh automatically updates the application when source files are modified during development.
-
-## Dependencies
-
-Dependencies are managed through `package.json`.
-
-To add a new Expo-compatible package:
-
-```bash
-npx expo install package-name
-```
+`src/app/index.tsx` — "Take Photo" / "Choose from Gallery" buttons (via
+`expo-image-picker`), uploads the picked image to the backend's `POST /predict`, and
+lists the top-3 breed predictions with their match score. No manual crop step yet,
+no styling beyond plain React Native components — see `docs/roadmap.md` for what's
+next.
 
 ## Backend Communication
 
-The mobile app communicates with the FastAPI backend through standard HTTP requests.
-
-Backend location: `/backend`
-
-The backend handles API requests, model inference, and database interactions.
-
-For the complete project architecture, see:
-
-- `CLAUDE.md`
-- `docs/plan.md`
+The mobile app talks to the FastAPI backend (`/backend`) over plain HTTP — see
+[`../backend/README.md`](../backend/README.md) for the API contract.

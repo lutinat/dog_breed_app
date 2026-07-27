@@ -1,1 +1,8 @@
 .pth
+
+# Python
+__pycache__/
+*.pyc
+
+# Node (mobile/ has its own, but keep root safe too)
+node_modules/

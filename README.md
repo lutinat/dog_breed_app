@@ -10,7 +10,7 @@ MVP scope.
 ```
 dog_breed_app/
 ├── mobile/     # React Native (Expo) mobile app
-├── backend/    # FastAPI API — serves the ML model, handles data (not scaffolded yet)
+├── backend/    # FastAPI API — serves the ML model, handles data
 ├── ml/         # Existing ML model integration (no training in this repo)
 └── docs/       # Architecture decisions, specs, plan.md (MVP detail), roadmap.md
 ```
@@ -29,13 +29,12 @@ See [mobile/README.md](mobile/README.md) for details.
 
 ### Backend
 
-Not scaffolded yet. Once created:
-
 ```bash
-cd backend
-conda activate dog_breed_app   # or your environment name
-uvicorn main:app --reload
+conda activate dog_breed_app
+uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+See [backend/README.md](backend/README.md) for setup and API details.
 
 ## Prerequisites
 
