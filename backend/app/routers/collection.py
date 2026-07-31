@@ -81,7 +81,14 @@ def get_collection(
         .all()
     )
     items = [
-        CollectionItemOut(breed_id=breed.id, name=breed.name, name_fr=breed.name_fr, discovered_at=entry.discovered_at)
+        CollectionItemOut(
+            breed_id=breed.id,
+            name=breed.name,
+            name_fr=breed.name_fr,
+            discovered_at=entry.discovered_at,
+            fun_fact_en=breed.fun_fact_en,
+            fun_fact_fr=breed.fun_fact_fr,
+        )
         for entry, breed in rows
     ]
     return CollectionResponse(items=items)

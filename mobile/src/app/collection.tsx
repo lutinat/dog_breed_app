@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { API_URL } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useLanguage } from "../lib/language";
+import { CollectionCard } from "../components/CollectionCard";
+import { ProgressBar } from "../components/ProgressBar";
+import { color, radius, space, type } from "../theme/tokens";
 
 type Breed = {
   id: number;
@@ -16,11 +20,14 @@ type CollectionItem = {
   breed_id: number;
   name: string;
   discovered_at: string;
+  fun_fact_en: string | null;
+  fun_fact_fr: string | null;
 };
 
 type GridEntry = {
   breed: Breed;
   discovered: boolean;
+  collectionItem: CollectionItem | null;
 };
 
 type Status = "loading" | "done" | "error";
@@ -47,12 +54,13 @@ export default function CollectionScreen() {
 
         const breedsData: { breeds: Breed[] } = await breedsResponse.json();
         const collectionData: { items: CollectionItem[] } = await collectionResponse.json();
-        const discoveredIds = new Set(collectionData.items.map((item) => item.breed_id));
+        const itemsByBreedId = new Map(collectionData.items.map((item) => [item.breed_id, item]));
 
         setEntries(
           breedsData.breeds.map((breed) => ({
             breed,
-            discovered: discoveredIds.has(breed.id),
+            discovered: itemsByBreedId.has(breed.id),
+            collectionItem: itemsByBreedId.get(breed.id) ?? null,
           }))
         );
         setStatus("done");
@@ -67,115 +75,117 @@ export default function CollectionScreen() {
   const discoveredCount = entries.filter((entry) => entry.discovered).length;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <Text style={styles.title}>{t.collection.title}</Text>
 
-      {status === "loading" && <ActivityIndicator style={styles.spacing} size="large" />}
+      {status === "loading" && <ActivityIndicator style={styles.spacing} size="large" color={color.primary} />}
 
-      {status === "error" && <Text style={styles.error}>{t.collection.loadError}</Text>}
+      {status === "error" && <Text style={[type.bodyMd, styles.error]}>{t.collection.loadError}</Text>}
 
       {status === "done" && (
         <>
-          <Text style={styles.progress}>
-            {discoveredCount} / {entries.length} {t.collection.breedsDiscovered}
-          </Text>
+          <View style={styles.progressCard}>
+            <View style={styles.progressRow}>
+              <Text style={styles.progressCount}>
+                {discoveredCount}/{entries.length}
+              </Text>
+              <Text style={[type.bodySm, styles.muted]}>{t.collection.breedsDiscovered}</Text>
+            </View>
+            <ProgressBar value={discoveredCount} max={entries.length} />
+          </View>
+
           <FlatList
             data={entries}
             keyExtractor={(entry) => String(entry.breed.id)}
-            numColumns={2}
+            numColumns={3}
             columnWrapperStyle={styles.row}
             contentContainerStyle={styles.grid}
-            renderItem={({ item }) => (
-              <View style={[styles.card, item.discovered ? styles.cardDiscovered : styles.cardLocked]}>
-                <Text style={styles.cardIcon}>{item.discovered ? "🐾" : "🔒"}</Text>
-                <Text style={item.discovered ? styles.cardName : styles.cardNameLocked} numberOfLines={2}>
-                  {item.discovered
-                    ? (language === "fr" && item.breed.name_fr) || item.breed.name
-                    : t.collection.locked}
-                </Text>
-              </View>
-            )}
+            renderItem={({ item }) => {
+              const entry = item.collectionItem;
+              return (
+                <Pressable
+                  style={styles.cardPress}
+                  disabled={!item.discovered || !entry}
+                  onPress={
+                    entry
+                      ? () =>
+                          router.push({
+                            pathname: "/breed/[id]",
+                            params: {
+                              id: String(item.breed.id),
+                              name: item.breed.name,
+                              name_fr: item.breed.name_fr ?? "",
+                              discoveredAt: entry.discovered_at,
+                              fun_fact_en: entry.fun_fact_en ?? "",
+                              fun_fact_fr: entry.fun_fact_fr ?? "",
+                            },
+                          })
+                      : undefined
+                  }
+                >
+                  <CollectionCard
+                    locked={!item.discovered}
+                    breedName={(language === "fr" && item.breed.name_fr) || item.breed.name}
+                    lockedLabel={t.collection.locked}
+                  />
+                </Pressable>
+              );
+            }}
           />
         </>
       )}
-
-      <Text style={styles.backLink} onPress={() => router.back()}>
-        {t.collection.backToScan}
-      </Text>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 80,
-    paddingHorizontal: 16,
+    backgroundColor: color.canvas,
+    paddingTop: space.xs,
+    paddingHorizontal: space.md,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  progress: {
-    fontSize: 16,
-    color: "#71807A",
-    textAlign: "center",
-    marginTop: 8,
-    marginBottom: 16,
+    ...type.displayMd,
+    color: color.ink,
+    marginBottom: space.md,
   },
   spacing: {
-    marginTop: 24,
+    marginTop: space.lg,
+  },
+  muted: {
+    color: color.muted,
   },
   error: {
-    color: "#C23B34",
+    color: color.error,
     textAlign: "center",
-    marginTop: 24,
+    marginTop: space.lg,
+  },
+  progressCard: {
+    backgroundColor: color.surface,
+    borderRadius: radius.xl,
+    padding: space.md,
+    gap: space.sm,
+    marginBottom: space.md,
+  },
+  progressRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: space.xs,
+  },
+  progressCount: {
+    ...type.dataLg,
+    color: color.primary,
   },
   grid: {
-    paddingBottom: 24,
+    paddingBottom: space.xl,
   },
   row: {
-    gap: 12,
-    marginBottom: 12,
+    gap: space.sm,
+    marginBottom: space.sm,
   },
-  card: {
+  cardPress: {
     flex: 1,
-    aspectRatio: 1,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 8,
-    gap: 6,
-  },
-  cardDiscovered: {
-    backgroundColor: "#E4EFEA",
-    borderWidth: 1.5,
-    borderColor: "#2C5F4F",
-  },
-  cardLocked: {
-    backgroundColor: "#EFEFEF",
-    borderWidth: 1.5,
-    borderColor: "#DADADA",
-  },
-  cardIcon: {
-    fontSize: 28,
-  },
-  cardName: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#2C5F4F",
-    textAlign: "center",
-  },
-  cardNameLocked: {
-    fontSize: 13,
-    color: "#9AA39D",
-    textAlign: "center",
-  },
-  backLink: {
-    color: "#2C5F4F",
-    fontWeight: "600",
-    textAlign: "center",
-    paddingVertical: 16,
+    aspectRatio: 3 / 4,
   },
 });

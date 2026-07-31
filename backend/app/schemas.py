@@ -68,6 +68,8 @@ class CollectionItemOut(BaseModel):
     name: str
     name_fr: str | None = None
     discovered_at: datetime
+    fun_fact_en: str | None = None
+    fun_fact_fr: str | None = None
 
 
 class CollectionResponse(BaseModel):
