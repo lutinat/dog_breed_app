@@ -35,7 +35,7 @@ User → mobile app → manual crop → backend API → ML model → classificat
 - `/ml` — existing ML model integration (loading, preprocessing, inference)
 - `/docs` — architecture decisions, specs, API contract, [`plan.md`](docs/plan.md) (MVP
   detail), [`roadmap.md`](docs/roadmap.md) (post-MVP versions)
-- [`DESIGN.md`](DESIGN.md) — early design-system exploration, not scheduled yet (see
+- [`DESIGN.md`](design/DESIGN.md) — early design-system exploration, not scheduled yet (see
   "Current priorities" below); some of it goes beyond MVP scope
 
 ## Environment
@@ -56,18 +56,22 @@ User → mobile app → manual crop → backend API → ML model → classificat
 - Keep the architecture simple until the MVP is validated — avoid over-engineering
 - Features beyond the MVP (auto-detection, mini-games, flash cards, social, etc.) belong
   in [`docs/roadmap.md`](docs/roadmap.md), not here, until they're in active development
-- Engineering comes first, design comes after: build the MVP flow with plain UI, don't
-  implement [`DESIGN.md`](DESIGN.md) yet. When design work does start, reconcile it with
-  `docs/plan.md`/`docs/roadmap.md` first — it currently assumes some post-MVP or
-  unplanned features (auto-detection, rarity/points system, map screen)
+- MVP flow works and the design system is applied to all 7 existing screens. Next up:
+  first-launch onboarding (the one MVP screen in [`docs/plan.md`](docs/plan.md) not yet
+  built — 2 screens, concept + collection system; designed as S01 in the prototype).
 
 ## To define in upcoming sessions
 
 - ML model serving mode (loaded in the FastAPI process vs. a separate service)
-- API contract between mobile and backend (upload format, JSON response, error handling)
-- PostgreSQL schema (users, breeds, collection, possibly scan history)
+- API contract doc: only `POST /predict` is written up (in `docs/plan.md`). The auth,
+  `/breeds` and `/collection` endpoints are still undocumented outside the code.
+- Confidence threshold for showing the top 3 — currently a `0.6` placeholder in
+  `mobile/src/app/result.tsx`, still to be set empirically
+- Where fun-fact content comes from long-term (hand-written vs. imported dataset)
 - Style and commit conventions (backend, frontend)
-- Build / lint / test commands once the project is initialized
+- **No tests exist yet** (backend or mobile). The riskiest untested paths are the
+  server-side crop in `/predict` and the crop-rect math in `mobile/src/app/crop.tsx`.
+  Lint is `npx expo lint`; typecheck is `npx tsc --noEmit` (both from `mobile/`).
 
 ---
 *Keep this file up to date as the project evolves — keep entries short, point to `/docs`
