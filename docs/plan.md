@@ -44,7 +44,8 @@ below). Don't build anything in the MVP that assumes automatic detection.
 ### 2. Breed classification
 
 - Take a photo (camera) or pick one from the gallery
-- Image sent to the backend after manual cropping (see Feature 3)
+- Full image plus crop coordinates sent to the backend, which crops before inference
+  (see Feature 3)
 - Expected result:
   - main breed + confidence score
   - top 3 breeds when confidence is low
@@ -59,8 +60,14 @@ No automatic detection in the MVP. Flow:
 
 1. User takes a photo
 2. User manually selects the dog area (interactive bounding box)
-3. Image is cropped client-side
-4. Cropped image is sent to the model
+3. The full photo (downscaled client-side to ~1600px on the long edge) plus the box
+   coordinates are sent to the backend
+4. The backend crops the image to that box before running the model
+
+Cropping happens server-side rather than on-device: `POST /predict` takes the full
+(downscaled) image as `file` plus `origin_x` / `origin_y` / `width` / `height` form
+fields describing the box, in that image's pixel coordinates. The response shape is
+unchanged — `{ predictions: [{ breed, score }] }`.
 
 Automatic detection is a Next-version improvement (see `roadmap.md`), not an MVP
 requirement.
@@ -103,21 +110,20 @@ Do not implement now (see `roadmap.md` for when it comes back):
 ## Architecture
 
 - Mobile: React Native + Expo, TypeScript
-- Backend: FastAPI (not scaffolded yet — `/backend` still needs to be created)
-- Database: PostgreSQL
+- Backend: FastAPI, in `/backend` (auth, `/predict`, `/breeds`, `/collection`)
+- Database: PostgreSQL, schema in `backend/app/models.py` — `users`, `breeds`
+  (reference table, 130 rows), `collection` (user × discovered breed). No scan
+  history table yet.
 - ML: existing ResNet50, loaded and served by the backend (exact serving mode = open
   decision, see below)
 
 ## Open decisions
 
 - Model serving mode: loaded in the FastAPI process vs. a separate service
-- Mobile ↔ backend API contract: upload format (cropped image + crop metadata?),
-  JSON response format (breeds + probabilities), error handling
-- PostgreSQL schema: users, breeds (reference table), collection (user × discovered
-  breed), possibly scan history
-- Exact number of breeds supported by the model, and where fun facts come from
-  (content source to define — manual writing vs. importing an existing dataset)
-- Confidence threshold that triggers showing the top 3 instead of a single result
+- Where fun-fact content comes from long-term (hand-written vs. importing an existing
+  dataset) — the 130 seeded breeds currently carry hand-written EN/FR facts
+- Confidence threshold that triggers showing the top 3 instead of a single result —
+  currently a `0.6` placeholder in `mobile/src/app/result.tsx`, to be set empirically
 
 ## MVP success metrics
 

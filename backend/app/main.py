@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import torch
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import io
@@ -48,9 +48,17 @@ def health():
 
 
 @app.post("/predict", response_model=PredictResponse)
-async def predict_breed(file: UploadFile = File(...)):
+async def predict_breed(
+    file: UploadFile = File(...),
+    origin_x: int = Form(...),
+    origin_y: int = Form(...),
+    width: int = Form(...),
+    height: int = Form(...),
+):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Uploaded file must be an image")
+    if width <= 0 or height <= 0:
+        raise HTTPException(status_code=400, detail="Crop width and height must be positive")
 
     contents = await file.read()
     try:
@@ -58,10 +66,15 @@ async def predict_breed(file: UploadFile = File(...)):
     except Exception:
         raise HTTPException(status_code=400, detail="Could not read image file")
 
+    # No detection model exists yet — the crop box is drawn by the user on
+    # the mobile app and its coordinates are just carried alongside the full
+    # upload, so cropping happens here rather than on-device.
+    cropped = image.crop((origin_x, origin_y, origin_x + width, origin_y + height))
+
     predictions = predict(
         model=ml_state["model"],
         idx_to_breed=ml_state["idx_to_breed"],
-        image=image,
+        image=cropped,
         device=DEVICE,
         top_k=3,
     )
