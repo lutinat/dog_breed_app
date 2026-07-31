@@ -36,8 +36,14 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Allow the app to access your camera to scan a dog.",
           "photosPermission": "Allow the app to access your photos to pick a dog picture."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow the app to access your camera to scan a dog.",
+          "recordAudioAndroid": false
         }
       ],
       "expo-secure-store"
