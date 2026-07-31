@@ -140,7 +140,7 @@ propagates through 7 is much worse than a slow start.
 
 ## Kickoff prompt
 
-> Read `design/SCREENS.md`, `docs/plan.md`, and `mobile/src/theme/tokens.ts`.
+> Read `design/CLAUDE-CODE-BRIEF.md`, `design/SCREENS.md`, `docs/plan.md`, and `mobile/src/theme/tokens.ts`.
 >
 > The MVP flow works — 7 screens in `mobile/src/app/`, plain UI. This task applies the
 > ToutouDex design system to them. **Restyle only: no new screens, no new features, no
