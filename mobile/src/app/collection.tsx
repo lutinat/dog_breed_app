@@ -4,10 +4,12 @@ import { router } from "expo-router";
 
 import { API_URL } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { useLanguage } from "../lib/language";
 
 type Breed = {
   id: number;
   name: string;
+  name_fr: string | null;
 };
 
 type CollectionItem = {
@@ -25,6 +27,7 @@ type Status = "loading" | "done" | "error";
 
 export default function CollectionScreen() {
   const { token } = useAuth();
+  const { t, language } = useLanguage();
   const [entries, setEntries] = useState<GridEntry[]>([]);
   const [status, setStatus] = useState<Status>("loading");
 
@@ -65,18 +68,16 @@ export default function CollectionScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Collection</Text>
+      <Text style={styles.title}>{t.collection.title}</Text>
 
       {status === "loading" && <ActivityIndicator style={styles.spacing} size="large" />}
 
-      {status === "error" && (
-        <Text style={styles.error}>Couldn't load your collection. Pull down to try again later.</Text>
-      )}
+      {status === "error" && <Text style={styles.error}>{t.collection.loadError}</Text>}
 
       {status === "done" && (
         <>
           <Text style={styles.progress}>
-            {discoveredCount} / {entries.length} breeds discovered
+            {discoveredCount} / {entries.length} {t.collection.breedsDiscovered}
           </Text>
           <FlatList
             data={entries}
@@ -88,7 +89,9 @@ export default function CollectionScreen() {
               <View style={[styles.card, item.discovered ? styles.cardDiscovered : styles.cardLocked]}>
                 <Text style={styles.cardIcon}>{item.discovered ? "🐾" : "🔒"}</Text>
                 <Text style={item.discovered ? styles.cardName : styles.cardNameLocked} numberOfLines={2}>
-                  {item.discovered ? item.breed.name : "???"}
+                  {item.discovered
+                    ? (language === "fr" && item.breed.name_fr) || item.breed.name
+                    : t.collection.locked}
                 </Text>
               </View>
             )}
@@ -97,7 +100,7 @@ export default function CollectionScreen() {
       )}
 
       <Text style={styles.backLink} onPress={() => router.back()}>
-        Back to Scan
+        {t.collection.backToScan}
       </Text>
     </View>
   );

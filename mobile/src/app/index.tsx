@@ -2,7 +2,11 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Link, router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 
+import { useLanguage } from "../lib/language";
+
 export default function ScanScreen() {
+  const { t } = useLanguage();
+
   const handlePicked = (result: ImagePicker.ImagePickerResult) => {
     if (result.canceled || result.assets.length === 0) {
       return;
@@ -14,7 +18,7 @@ export default function ScanScreen() {
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Camera permission is required to take a photo.");
+      Alert.alert(t.scan.cameraPermission);
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
@@ -24,7 +28,7 @@ export default function ScanScreen() {
   const pickFromGallery = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Photo library permission is required to pick an image.");
+      Alert.alert(t.scan.galleryPermission);
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -38,22 +42,25 @@ export default function ScanScreen() {
     <View style={styles.container}>
       <View style={styles.navRow}>
         <Link href="/collection" style={styles.navLink}>
-          <Text style={styles.navLinkText}>Collection</Text>
+          <Text style={styles.navLinkText}>{t.scan.collection}</Text>
         </Link>
         <Link href="/profile" style={styles.navLink}>
-          <Text style={styles.navLinkText}>Profile</Text>
+          <Text style={styles.navLinkText}>{t.scan.profile}</Text>
+        </Link>
+        <Link href="/settings" style={styles.navLink}>
+          <Text style={styles.navLinkText}>{t.settings.title}</Text>
         </Link>
       </View>
 
       <View style={styles.center}>
-        <Text style={styles.title}>Scan a dog</Text>
+        <Text style={styles.title}>{t.scan.title}</Text>
 
         <View style={styles.buttonRow}>
           <Pressable style={styles.button} onPress={takePhoto}>
-            <Text style={styles.buttonText}>Take Photo</Text>
+            <Text style={styles.buttonText}>{t.scan.takePhoto}</Text>
           </Pressable>
           <Pressable style={styles.button} onPress={pickFromGallery}>
-            <Text style={styles.buttonText}>Choose from Gallery</Text>
+            <Text style={styles.buttonText}>{t.scan.chooseFromGallery}</Text>
           </Pressable>
         </View>
       </View>

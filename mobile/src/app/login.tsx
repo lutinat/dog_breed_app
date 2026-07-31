@@ -3,9 +3,11 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import { Link } from "expo-router";
 
 import { useAuth } from "../lib/auth";
+import { useLanguage } from "../lib/language";
 
 export default function LoginScreen() {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -33,11 +35,15 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Log in</Text>
+      <Link href="/settings" style={styles.settingsLink}>
+        <Text style={styles.settingsLinkText}>{t.settings.title}</Text>
+      </Link>
+
+      <Text style={styles.title}>{t.login.title}</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder={t.login.email}
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -45,7 +51,7 @@ export default function LoginScreen() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder={t.login.password}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -54,11 +60,11 @@ export default function LoginScreen() {
       {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
 
       <Pressable style={styles.button} onPress={handleSubmit} disabled={submitting}>
-        {submitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>Log in</Text>}
+        {submitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>{t.login.submit}</Text>}
       </Pressable>
 
       <Link href="/register" style={styles.link}>
-        <Text style={styles.linkText}>Need an account? Register</Text>
+        <Text style={styles.linkText}>{t.login.needAccount}</Text>
       </Link>
     </View>
   );
@@ -111,5 +117,15 @@ const styles = StyleSheet.create({
     color: "#C23B34",
     textAlign: "center",
     maxWidth: 320,
+  },
+  settingsLink: {
+    position: "absolute",
+    top: 56,
+    right: 20,
+    padding: 4,
+  },
+  settingsLinkText: {
+    color: "#2C5F4F",
+    fontWeight: "600",
   },
 });

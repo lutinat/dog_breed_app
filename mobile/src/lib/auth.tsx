@@ -24,6 +24,11 @@ async function parseErrorMessage(response: Response): Promise<string> {
   try {
     const data = await response.json();
     if (typeof data.detail === "string") return data.detail;
+    // FastAPI/pydantic validation errors (422) shape `detail` as an array of
+    // {msg, loc, ...} objects rather than a string — surface the first one.
+    if (Array.isArray(data.detail) && typeof data.detail[0]?.msg === "string") {
+      return data.detail[0].msg;
+    }
   } catch {
     // fall through to generic message
   }

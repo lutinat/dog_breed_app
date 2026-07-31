@@ -3,9 +3,11 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import { Link } from "expo-router";
 
 import { useAuth } from "../lib/auth";
+import { useLanguage } from "../lib/language";
 
 export default function RegisterScreen() {
   const { register } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -20,7 +22,7 @@ export default function RegisterScreen() {
     if (password.length < 8) {
       // react-native-web's Alert.alert() is a no-op, so validation errors
       // must be shown inline to work on both web and native.
-      setErrorMessage("Password must be at least 8 characters.");
+      setErrorMessage(t.register.passwordTooShort);
       return;
     }
     submittingRef.current = true;
@@ -37,11 +39,15 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create an account</Text>
+      <Link href="/settings" style={styles.settingsLink}>
+        <Text style={styles.settingsLinkText}>{t.settings.title}</Text>
+      </Link>
+
+      <Text style={styles.title}>{t.register.title}</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder={t.register.email}
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -49,7 +55,7 @@ export default function RegisterScreen() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Password (min 8 characters)"
+        placeholder={t.register.passwordHint}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -58,11 +64,15 @@ export default function RegisterScreen() {
       {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
 
       <Pressable style={styles.button} onPress={handleSubmit} disabled={submitting}>
-        {submitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>Register</Text>}
+        {submitting ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text style={styles.buttonText}>{t.register.submit}</Text>
+        )}
       </Pressable>
 
       <Link href="/login" style={styles.link}>
-        <Text style={styles.linkText}>Already have an account? Log in</Text>
+        <Text style={styles.linkText}>{t.register.haveAccount}</Text>
       </Link>
     </View>
   );
@@ -115,5 +125,15 @@ const styles = StyleSheet.create({
     color: "#C23B34",
     textAlign: "center",
     maxWidth: 320,
+  },
+  settingsLink: {
+    position: "absolute",
+    top: 56,
+    right: 20,
+    padding: 4,
+  },
+  settingsLinkText: {
+    color: "#2C5F4F",
+    fontWeight: "600",
   },
 });

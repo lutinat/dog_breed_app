@@ -4,11 +4,13 @@ import { router } from "expo-router";
 
 import { API_URL } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { useLanguage } from "../lib/language";
 
 type Status = "loading" | "done" | "error";
 
 export default function ProfileScreen() {
   const { user, token, logout } = useAuth();
+  const { t } = useLanguage();
   const [progress, setProgress] = useState<{ discovered: number; total: number } | null>(null);
   const [status, setStatus] = useState<Status>("loading");
 
@@ -45,28 +47,28 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
+      <Text style={styles.title}>{t.profile.title}</Text>
 
       <Text style={styles.email}>{user?.email}</Text>
 
       {status === "loading" && <ActivityIndicator style={styles.spacing} />}
-      {status === "error" && <Text style={styles.error}>Couldn't load your progress.</Text>}
+      {status === "error" && <Text style={styles.error}>{t.profile.progressError}</Text>}
       {status === "done" && progress && (
         <Text style={styles.progress}>
-          {progress.discovered} / {progress.total} breeds discovered
+          {progress.discovered} / {progress.total} {t.profile.breedsDiscovered}
         </Text>
       )}
 
       <Pressable style={styles.secondaryButton} onPress={() => router.push("/collection")}>
-        <Text style={styles.secondaryButtonText}>View collection</Text>
+        <Text style={styles.secondaryButtonText}>{t.profile.viewCollection}</Text>
       </Pressable>
 
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Log out</Text>
+        <Text style={styles.logoutButtonText}>{t.profile.logOut}</Text>
       </Pressable>
 
       <Text style={styles.backLink} onPress={() => router.back()}>
-        Back to Scan
+        {t.profile.backToScan}
       </Text>
     </View>
   );

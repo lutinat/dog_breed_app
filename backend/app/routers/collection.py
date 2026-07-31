@@ -17,10 +17,14 @@ from ..schemas import (
 router = APIRouter(tags=["collection"])
 
 
+def _breed_out(breed: Breed) -> BreedOut:
+    return BreedOut(id=breed.id, name=breed.name, name_fr=breed.name_fr)
+
+
 @router.get("/breeds", response_model=BreedsResponse)
 def list_breeds(db: Session = Depends(get_db)):
     breeds = db.query(Breed).order_by(Breed.name).all()
-    return BreedsResponse(breeds=[BreedOut(id=b.id, name=b.name) for b in breeds])
+    return BreedsResponse(breeds=[_breed_out(b) for b in breeds])
 
 
 @router.post("/collection", response_model=CollectionAddResponse)
@@ -36,7 +40,7 @@ def add_to_collection(
     existing = db.get(Collection, (current_user.id, breed.id))
     if existing is not None:
         return CollectionAddResponse(
-            breed=BreedOut(id=breed.id, name=breed.name),
+            breed=_breed_out(breed),
             is_new_discovery=False,
             discovered_at=existing.discovered_at,
         )
@@ -49,16 +53,18 @@ def add_to_collection(
         db.rollback()
         entry = db.get(Collection, (current_user.id, breed.id))
         return CollectionAddResponse(
-            breed=BreedOut(id=breed.id, name=breed.name),
+            breed=_breed_out(breed),
             is_new_discovery=False,
             discovered_at=entry.discovered_at,
         )
     db.refresh(entry)
 
     return CollectionAddResponse(
-        breed=BreedOut(id=breed.id, name=breed.name),
+        breed=_breed_out(breed),
         is_new_discovery=True,
         discovered_at=entry.discovered_at,
+        fun_fact_en=breed.fun_fact_en,
+        fun_fact_fr=breed.fun_fact_fr,
     )
 
 
@@ -75,7 +81,7 @@ def get_collection(
         .all()
     )
     items = [
-        CollectionItemOut(breed_id=breed.id, name=breed.name, discovered_at=entry.discovered_at)
+        CollectionItemOut(breed_id=breed.id, name=breed.name, name_fr=breed.name_fr, discovered_at=entry.discovered_at)
         for entry, breed in rows
     ]
     return CollectionResponse(items=items)

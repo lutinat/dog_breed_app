@@ -5,6 +5,8 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import * as ImageManipulator from "expo-image-manipulator";
 
+import { useLanguage } from "../lib/language";
+
 const STAGE_WIDTH = Math.min(Dimensions.get("window").width - 32, 500);
 const STAGE_HEIGHT = 420;
 const MIN_BOX_SIZE = 48;
@@ -55,6 +57,7 @@ function resizeFromCorner(
 }
 
 export default function CropScreen() {
+  const { t } = useLanguage();
   const { uri } = useLocalSearchParams<{ uri: string }>();
   const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
   const [cropping, setCropping] = useState(false);
@@ -71,7 +74,7 @@ export default function CropScreen() {
   if (!uri) {
     return (
       <View style={styles.center}>
-        <Text>No image to crop.</Text>
+        <Text>{t.crop.noImage}</Text>
       </View>
     );
   }
@@ -117,6 +120,7 @@ function CropStage({
   cropping: boolean;
   onConfirm: (rect: { originX: number; originY: number; width: number; height: number }) => void;
 }) {
+  const { t } = useLanguage();
   const scale = Math.min(STAGE_WIDTH / naturalSize.width, STAGE_HEIGHT / naturalSize.height);
   const displayWidth = naturalSize.width * scale;
   const displayHeight = naturalSize.height * scale;
@@ -257,8 +261,8 @@ function CropStage({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Frame the dog</Text>
-      <Text style={styles.subtitle}>Drag the box, resize from the corners</Text>
+      <Text style={styles.title}>{t.crop.title}</Text>
+      <Text style={styles.subtitle}>{t.crop.subtitle}</Text>
 
       <View style={[styles.stage, { width: STAGE_WIDTH, height: STAGE_HEIGHT }]}>
         <Image
@@ -291,13 +295,13 @@ function CropStage({
 
       <View style={styles.buttonRow}>
         <Pressable style={styles.secondaryButton} onPress={() => router.back()}>
-          <Text style={styles.secondaryButtonText}>Cancel</Text>
+          <Text style={styles.secondaryButtonText}>{t.crop.cancel}</Text>
         </Pressable>
         <Pressable style={styles.button} onPress={confirm} disabled={cropping}>
           {cropping ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.buttonText}>Confirm Crop</Text>
+            <Text style={styles.buttonText}>{t.crop.confirm}</Text>
           )}
         </Pressable>
       </View>

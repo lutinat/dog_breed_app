@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 
 import { API_URL } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { useLanguage } from "../lib/language";
 
 type Prediction = {
   breed: string;
@@ -15,11 +16,32 @@ type CollectionStatus = "idle" | "saving" | "new" | "already-owned" | "error";
 
 export default function ResultScreen() {
   const { token } = useAuth();
+  const { t, language } = useLanguage();
   const { uri } = useLocalSearchParams<{ uri: string }>();
   const [predictions, setPredictions] = useState<Prediction[] | null>(null);
   const [status, setStatus] = useState<Status>("uploading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [collectionStatus, setCollectionStatus] = useState<CollectionStatus>("idle");
+  const [funFacts, setFunFacts] = useState<{ en: string | null; fr: string | null } | null>(null);
+  const funFact = funFacts ? (language === "fr" ? funFacts.fr : funFacts.en) : null;
+  const [breedNamesFr, setBreedNamesFr] = useState<Record<string, string | null>>({});
+
+  useEffect(() => {
+    // /predict returns raw ML class labels (always English) — fetch the
+    // breeds list once to translate them for display without touching the
+    // value actually sent to POST /collection, which must stay the exact
+    // English string the model/DB use as the join key.
+    fetch(`${API_URL}/breeds`)
+      .then((response) => response.json())
+      .then((data: { breeds: { name: string; name_fr: string | null }[] }) => {
+        setBreedNamesFr(Object.fromEntries(data.breeds.map((b) => [b.name, b.name_fr])));
+      })
+      .catch(() => {
+        // Non-critical: predictions just fall back to the English name.
+      });
+  }, []);
+
+  const displayBreedName = (name: string) => (language === "fr" && breedNamesFr[name]) || name;
 
   useEffect(() => {
     if (!uri) return;
@@ -97,8 +119,10 @@ export default function ResultScreen() {
 
       if (!response.ok) throw new Error(`Server responded with ${response.status}`);
 
-      const data: { is_new_discovery: boolean } = await response.json();
+      const data: { is_new_discovery: boolean; fun_fact_en: string | null; fun_fact_fr: string | null } =
+        await response.json();
       setCollectionStatus(data.is_new_discovery ? "new" : "already-owned");
+      setFunFacts({ en: data.fun_fact_en, fr: data.fun_fact_fr });
     } catch {
       setCollectionStatus("error");
     }
@@ -107,7 +131,7 @@ export default function ResultScreen() {
   if (!uri) {
     return (
       <View style={styles.center}>
-        <Text>No image to classify.</Text>
+        <Text>{t.result.noImage}</Text>
       </View>
     );
   }
@@ -122,31 +146,34 @@ export default function ResultScreen() {
 
       {status === "done" && predictions && (
         <View style={styles.spacing}>
-          <Text style={styles.resultsTitle}>Predictions</Text>
+          <Text style={styles.resultsTitle}>{t.result.predictions}</Text>
           {predictions.map((prediction) => (
             <Text key={prediction.breed} style={styles.resultRow}>
-              {prediction.breed} — {Math.round(prediction.score * 100)}% match
+              {displayBreedName(prediction.breed)} — {Math.round(prediction.score * 100)}% {t.result.match}
             </Text>
           ))}
 
           {collectionStatus === "idle" && (
             <Pressable style={styles.secondaryButton} onPress={addToCollection}>
-              <Text style={styles.secondaryButtonText}>Add to collection</Text>
+              <Text style={styles.secondaryButtonText}>{t.result.addToCollection}</Text>
             </Pressable>
           )}
           {collectionStatus === "saving" && <ActivityIndicator style={styles.spacing} />}
-          {collectionStatus === "new" && <Text style={styles.discovery}>New breed discovered!</Text>}
+          {collectionStatus === "new" && (
+            <View style={styles.spacing}>
+              <Text style={styles.discovery}>{t.result.newDiscovery}</Text>
+              {funFact && <Text style={styles.funFact}>{funFact}</Text>}
+            </View>
+          )}
           {collectionStatus === "already-owned" && (
-            <Text style={styles.discoveryMuted}>Already in your collection.</Text>
+            <Text style={styles.discoveryMuted}>{t.result.alreadyOwned}</Text>
           )}
-          {collectionStatus === "error" && (
-            <Text style={styles.error}>Couldn't save to your collection. Try again.</Text>
-          )}
+          {collectionStatus === "error" && <Text style={styles.error}>{t.result.collectionError}</Text>}
         </View>
       )}
 
       <Pressable style={styles.button} onPress={() => router.replace("/")}>
-        <Text style={styles.buttonText}>Scan another dog</Text>
+        <Text style={styles.buttonText}>{t.result.scanAnother}</Text>
       </Pressable>
     </ScrollView>
   );
@@ -216,6 +243,14 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: "#2C5F4F",
     fontWeight: "600",
+    textAlign: "center",
+  },
+  funFact: {
+    marginTop: 8,
+    color: "#3D4A44",
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
   },
   discoveryMuted: {
     marginTop: 12,
