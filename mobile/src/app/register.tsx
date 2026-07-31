@@ -1,9 +1,13 @@
 import { useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "../lib/auth";
 import { useLanguage } from "../lib/language";
+import { Button } from "../components/Button";
+import { TextField } from "../components/TextField";
+import { color, space, type } from "../theme/tokens";
 
 export default function RegisterScreen() {
   const { register } = useAuth();
@@ -11,18 +15,23 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Kept separate: a too-short password is field-scoped, but a failed
+  // registration (e.g. "Email already registered") isn't about the
+  // password at all — attaching it to that field would misattribute it.
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const submittingRef = useRef(false);
 
   const handleSubmit = async () => {
     // Ref check, not just `submitting` state: on web, a single Pressable tap
     // can invoke onPress twice before React commits the state update.
     if (submittingRef.current) return;
-    setErrorMessage(null);
+    setPasswordError(null);
+    setFormError(null);
     if (password.length < 8) {
       // react-native-web's Alert.alert() is a no-op, so validation errors
       // must be shown inline to work on both web and native.
-      setErrorMessage(t.register.passwordTooShort);
+      setPasswordError(t.register.passwordTooShort);
       return;
     }
     submittingRef.current = true;
@@ -30,7 +39,7 @@ export default function RegisterScreen() {
     try {
       await register(email.trim(), password);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Please try again.");
+      setFormError(error instanceof Error ? error.message : "Please try again.");
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
@@ -38,102 +47,76 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Link href="/settings" style={styles.settingsLink}>
-        <Text style={styles.settingsLinkText}>{t.settings.title}</Text>
-      </Link>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.form}>
+        <View>
+          <Text style={styles.title}>{t.register.title}</Text>
+          <Text style={[type.bodyMd, styles.subtitle]}>{t.register.subtitle}</Text>
+        </View>
 
-      <Text style={styles.title}>{t.register.title}</Text>
+        <TextField
+          label={t.register.email}
+          placeholder={t.register.emailPlaceholder}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextField
+          label={t.register.password}
+          placeholder={t.register.passwordPlaceholder}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          error={passwordError}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder={t.register.email}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder={t.register.passwordHint}
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+        {formError && <Text style={[type.bodySm, styles.formError]}>{formError}</Text>}
 
-      {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+        <Button variant="primary" fullWidth disabled={submitting} onPress={handleSubmit} style={styles.spacing}>
+          {submitting ? t.register.submitting : t.register.submit}
+        </Button>
 
-      <Pressable style={styles.button} onPress={handleSubmit} disabled={submitting}>
-        {submitting ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
-          <Text style={styles.buttonText}>{t.register.submit}</Text>
-        )}
-      </Pressable>
-
-      <Link href="/login" style={styles.link}>
-        <Text style={styles.linkText}>{t.register.haveAccount}</Text>
-      </Link>
-    </View>
+        <View style={styles.linkRow}>
+          <Link href="/login">
+            <Text style={styles.linkText}>{t.register.haveAccount}</Text>
+          </Link>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    backgroundColor: color.canvas,
     justifyContent: "center",
-    padding: 24,
-    gap: 12,
+    paddingHorizontal: space.md,
+  },
+  form: {
+    gap: space.md,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 12,
+    ...type.displayLg,
+    color: color.ink,
   },
-  input: {
-    width: "100%",
-    maxWidth: 320,
-    borderWidth: 1,
-    borderColor: "#CCCCCC",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    fontSize: 16,
+  subtitle: {
+    color: color.body,
+    marginTop: space.xxs,
   },
-  button: {
-    backgroundColor: "#2C5F4F",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    minWidth: 140,
+  formError: {
+    color: color.error,
+    textAlign: "center",
+  },
+  spacing: {
+    marginTop: space.xs,
+  },
+  linkRow: {
     alignItems: "center",
-    marginTop: 8,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  link: {
-    marginTop: 16,
   },
   linkText: {
-    color: "#2C5F4F",
-    fontWeight: "600",
-  },
-  error: {
-    color: "#C23B34",
-    textAlign: "center",
-    maxWidth: 320,
-  },
-  settingsLink: {
-    position: "absolute",
-    top: 56,
-    right: 20,
-    padding: 4,
-  },
-  settingsLinkText: {
-    color: "#2C5F4F",
-    fontWeight: "600",
+    ...type.button,
+    color: color.primary,
   },
 });

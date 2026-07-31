@@ -1,9 +1,13 @@
 import { useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "../lib/auth";
 import { useLanguage } from "../lib/language";
+import { Button } from "../components/Button";
+import { TextField } from "../components/TextField";
+import { color, space, type } from "../theme/tokens";
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -34,98 +38,63 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Link href="/settings" style={styles.settingsLink}>
-        <Text style={styles.settingsLinkText}>{t.settings.title}</Text>
-      </Link>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.form}>
+        <Text style={styles.title}>{t.login.title}</Text>
 
-      <Text style={styles.title}>{t.login.title}</Text>
+        <TextField
+          label={t.login.email}
+          placeholder={t.login.emailPlaceholder}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextField
+          label={t.login.password}
+          placeholder={t.login.passwordPlaceholder}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          error={errorMessage}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder={t.login.email}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder={t.login.password}
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+        <Button variant="primary" fullWidth disabled={submitting} onPress={handleSubmit} style={styles.spacing}>
+          {submitting ? t.login.submitting : t.login.submit}
+        </Button>
 
-      {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
-
-      <Pressable style={styles.button} onPress={handleSubmit} disabled={submitting}>
-        {submitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>{t.login.submit}</Text>}
-      </Pressable>
-
-      <Link href="/register" style={styles.link}>
-        <Text style={styles.linkText}>{t.login.needAccount}</Text>
-      </Link>
-    </View>
+        <View style={styles.linkRow}>
+          <Link href="/register">
+            <Text style={styles.linkText}>{t.login.needAccount}</Text>
+          </Link>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    backgroundColor: color.canvas,
     justifyContent: "center",
-    padding: 24,
-    gap: 12,
+    paddingHorizontal: space.md,
+  },
+  form: {
+    gap: space.md,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 12,
+    ...type.displayLg,
+    color: color.ink,
   },
-  input: {
-    width: "100%",
-    maxWidth: 320,
-    borderWidth: 1,
-    borderColor: "#CCCCCC",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    fontSize: 16,
+  spacing: {
+    marginTop: space.xs,
   },
-  button: {
-    backgroundColor: "#2C5F4F",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    minWidth: 140,
+  linkRow: {
     alignItems: "center",
-    marginTop: 8,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  link: {
-    marginTop: 16,
   },
   linkText: {
-    color: "#2C5F4F",
-    fontWeight: "600",
-  },
-  error: {
-    color: "#C23B34",
-    textAlign: "center",
-    maxWidth: 320,
-  },
-  settingsLink: {
-    position: "absolute",
-    top: 56,
-    right: 20,
-    padding: 4,
-  },
-  settingsLinkText: {
-    color: "#2C5F4F",
-    fontWeight: "600",
+    ...type.button,
+    color: color.primary,
   },
 });

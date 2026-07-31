@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
+import { Feather } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { API_URL } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useLanguage } from "../lib/language";
+import { ProgressBar } from "../components/ProgressBar";
+import { border, color, font, hitSlop, radius, space, type } from "../theme/tokens";
 
 type Status = "loading" | "done" | "error";
 
@@ -46,89 +50,132 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t.profile.title}</Text>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{t.profile.title}</Text>
+        <Pressable
+          onPress={() => router.push("/settings")}
+          hitSlop={hitSlop}
+          style={styles.settingsButton}
+          accessibilityLabel={t.settings.title}
+        >
+          <Feather name="settings" size={19} color={color.body} />
+        </Pressable>
+      </View>
 
-      <Text style={styles.email}>{user?.email}</Text>
+      {status === "loading" && <ActivityIndicator style={styles.spacing} size="large" color={color.primary} />}
+      {status === "error" && <Text style={[type.bodyMd, styles.error]}>{t.profile.progressError}</Text>}
 
-      {status === "loading" && <ActivityIndicator style={styles.spacing} />}
-      {status === "error" && <Text style={styles.error}>{t.profile.progressError}</Text>}
       {status === "done" && progress && (
-        <Text style={styles.progress}>
-          {progress.discovered} / {progress.total} {t.profile.breedsDiscovered}
-        </Text>
+        <View style={styles.progressCard}>
+          <Text style={styles.progressLabel}>{t.profile.breedsDiscovered}</Text>
+          <View style={styles.progressCountRow}>
+            <Text style={styles.progressCount}>{progress.discovered}</Text>
+            <Text style={styles.progressTotal}>/{progress.total}</Text>
+          </View>
+          <View style={styles.spacing}>
+            <ProgressBar value={progress.discovered} max={progress.total} />
+          </View>
+          <Text style={[type.bodySm, styles.email]}>{user?.email}</Text>
+        </View>
       )}
 
-      <Pressable style={styles.secondaryButton} onPress={() => router.push("/collection")}>
-        <Text style={styles.secondaryButtonText}>{t.profile.viewCollection}</Text>
-      </Pressable>
-
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>{t.profile.logOut}</Text>
-      </Pressable>
-
-      <Text style={styles.backLink} onPress={() => router.back()}>
-        {t.profile.backToScan}
-      </Text>
-    </View>
+      <View style={styles.rows}>
+        <Pressable style={styles.row} onPress={() => router.push("/settings")}>
+          <Feather name="settings" size={19} color={color.muted} />
+          <Text style={[type.bodyMdMedium, styles.rowLabel]}>{t.settings.title}</Text>
+          <Feather name="chevron-right" size={18} color={color.mutedSoft} />
+        </Pressable>
+        <Pressable style={styles.row} onPress={handleLogout}>
+          <Feather name="log-out" size={19} color={color.error} />
+          <Text style={[type.bodyMdMedium, styles.rowLabelDestructive]}>{t.profile.logOut}</Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: color.canvas,
+    paddingHorizontal: space.md,
+    paddingTop: space.xs,
+  },
+  header: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    gap: 12,
+    justifyContent: "space-between",
+    marginBottom: space.md,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "600",
+  headerTitle: {
+    ...type.displayMd,
+    color: color.ink,
   },
-  email: {
-    fontSize: 16,
-    color: "#71807A",
+  settingsButton: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    backgroundColor: color.surface,
+    borderWidth: border.hairline,
+    borderColor: color.hairline,
+    alignItems: "center",
+    justifyContent: "center",
   },
   spacing: {
-    marginTop: 8,
-  },
-  progress: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#2C5F4F",
-    marginTop: 4,
+    marginTop: space.sm,
   },
   error: {
-    color: "#C23B34",
-    marginTop: 4,
+    color: color.error,
   },
-  secondaryButton: {
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderWidth: 1.5,
-    borderColor: "#2C5F4F",
-    marginTop: 16,
+  progressCard: {
+    backgroundColor: color.surface,
+    borderRadius: radius.xl,
+    padding: space.md,
   },
-  secondaryButtonText: {
-    color: "#2C5F4F",
-    fontWeight: "600",
+  progressLabel: {
+    ...type.labelUppercase,
+    color: color.muted,
+    textAlign: "center",
   },
-  logoutButton: {
-    backgroundColor: "#C23B34",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 8,
+  progressCountRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    marginTop: space.xxs,
   },
-  logoutButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
+  progressCount: {
+    fontFamily: font.mono,
+    fontSize: 44,
+    color: color.ink,
   },
-  backLink: {
-    color: "#2C5F4F",
-    fontWeight: "600",
-    paddingVertical: 16,
+  progressTotal: {
+    fontFamily: font.mono,
+    fontSize: 22,
+    color: color.muted,
+  },
+  email: {
+    color: color.muted,
+    marginTop: space.sm,
+    textAlign: "center",
+  },
+  rows: {
+    marginTop: space.lg,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+    paddingVertical: space.sm + space.xxs,
+    borderBottomWidth: border.hairline,
+    borderBottomColor: color.hairlineSoft,
+  },
+  rowLabel: {
+    flex: 1,
+    color: color.ink,
+  },
+  rowLabelDestructive: {
+    flex: 1,
+    color: color.error,
   },
 });
