@@ -72,3 +72,8 @@ User → mobile app → manual crop → backend API → ML model → classificat
 ---
 *Keep this file up to date as the project evolves — keep entries short, point to `/docs`
 for detail instead of pasting everything here.*
+
+## Design
+UI is specified in `design/SCREENS.md` (31 screens, tokens, interaction rules).
+`design/prototype/` is a browser-only visual reference — read it, never port it.
+Design tokens live in `mobile/src/theme/tokens.ts`.

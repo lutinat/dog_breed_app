@@ -1,0 +1,11 @@
+:root{
+--primary:#2C5F4F;--primary-pressed:#1E453A;--primary-soft:#DCEBE3;--on-primary:#FFFFFF;
+--secondary:#3E7CA6;--secondary-soft:#DCEAF3;--on-secondary:#FFFFFF;
+--accent:#F2A93B;--accent-deep:#D6871B;--accent-soft:#FDECC8;--on-accent:#22302A;
+--canvas:#FBF7EF;--surface:#FFFFFF;--surface-sunken:#F1EBDF;--hairline:#E4DDCC;--hairline-soft:#EEE8DA;
+--canvas-field:#0F211B;--surface-field:#17332A;--surface-field-elevated:#1E4335;--on-field:#FFFFFF;--on-field-muted:#A9C4B7;
+--ink:#22302A;--body:#3C4A43;--muted:#71807A;--muted-soft:#9CA9A2;
+--success:#3F9155;--warning:#C97A2B;--error:#C23B34;
+--rarity-common:#9CA9A2;--rarity-rare:#3E7CA6;--rarity-legendary:#E0A930;--rarity-legendary-glow:#FBE3A0;
+--surface-card:var(--surface);--text-body:var(--body);--text-heading:var(--ink);--text-muted:var(--muted);
+}

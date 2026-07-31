@@ -1,0 +1,6 @@
+:root{
+--shadow-card:0px 4px 12px 0px rgba(44,32,14,0.08);
+--shadow-elevated:0px 12px 32px -8px rgba(34,48,42,0.18);
+--shadow-field-glow:0px 0px 24px 0px rgba(242,169,59,0.35);
+--shadow-legendary-glow:0px 0px 24px 0px rgba(224,169,48,0.45);
+}
