@@ -4,3 +4,10 @@ torch
 torchvision
 pillow
 python-multipart
+sqlalchemy>=2.0
+alembic
+psycopg[binary]
+pydantic-settings
+pyjwt
+bcrypt
+email-validator

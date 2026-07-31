@@ -1,8 +1,16 @@
-.pth
+*.pth
 
 # Python
 __pycache__/
 *.pyc
 
+# Secrets
+.env
+backend/.env
+mobile/.env
+
 # Node (mobile/ has its own, but keep root safe too)
 node_modules/
+
+# manual test fixtures
+ml/n107437.jpg

@@ -10,6 +10,8 @@ import io
 from ml.inference import predict
 from ml.model import load_model
 
+from .routers.auth import router as auth_router
+from .routers.collection import router as collection_router
 from .schemas import PredictResponse
 
 CHECKPOINT_PATH = Path(__file__).resolve().parents[2] / "ml" / "resnet50_first_run.pth"
@@ -35,6 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
+app.include_router(collection_router)
 
 
 @app.get("/health")
